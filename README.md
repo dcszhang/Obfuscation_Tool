@@ -2,56 +2,30 @@
 
 ## Introduction
 
-**Obfuscation_Tool** is a Python-based framework for analyzing and quantifying obfuscation in Ethereum smart contract bytecode. This repository contains the implementation of the methods described in the paper [“Obfuscation Unmasked: Revealing Hidden Logic in Ethereum Scam Contracts via Bytecode-level Transfer Analysis”]. The tool extracts a set of obfuscation-related features from one or more smart contracts, computes a Z‐score ranking to identify heavily obfuscated contracts, and outputs detailed per-contract metrics.
+**Obfuscation_Tool** is a Python-based framework for analyzing and quantifying obfuscation in Ethereum smart contract bytecode. This repository implements the methods described in the paper “Obfuscation Unmasked: Revealing Hidden Logic in Ethereum Scam Contracts via Bytecode-Level Transfer Analysis.” The tool extracts seven bytecode-level obfuscation features (F1–F7) from smart contracts, computes a Z-score for each contract, and outputs detailed per-contract metrics.
 
 Key capabilities include:
 
-- **Single‐contract analysis**: Parse a raw bytecode string and report:
-  1. Transfer‐graph metrics (trace depth, control‐flow tree height, string‐operation count).
-  2. Maximum similarity between transfer subgraphs.
-  3. Presence of external‐call conditions guarding transfers.
-  4. Function‐level instruction statistics (call‐related vs. “useless” instructions, related‐ratio).
-  5. PHI‐node occurrences and transfer‐address traces.
-- **Batch analysis (multi‐threaded)**: Use Dask to process a large CSV of bytecode strings in parallel and store all per‐contract results in `output.csv`.
+- **Single-contract analysis**: Parse a raw bytecode string and extract F1–F7 as defined in the paper:
+  1. **F1. Number of steps in address generation**  
+     Backward dataflow analysis on the `address` variable, counting distinct arithmetic, hash, bitwise, and external-call steps.
+  2. **F2. Number of string operations**  
+     Count of all string-manipulation and hash instructions involved in `address` generation.
+  3. **F3. Presence of external call**  
+     Binary flag indicating whether any `CALL`, `DELEGATECALL`, or `STATICCALL` appears in the `addr`/`value` dataflow.
+  4. **F4. Height of branch tree**  
+     Maximum nesting depth of conditional branches (`JUMPI`) along the transfer’s control-flow path.
+  5. **F5. Transfer-related instruction ratio (TIR)**  
+     Ratio of effective transfer- and state-update instructions to total instructions in the transfer-residing function.
+  6. **F6. Transfer operation similarity**  
+     Cosine similarity between R-GCN–embedded PDG representations of transfer-containing functions.
+  7. **F7. Relevance of log events**  
+     Binary flag indicating whether logs emitted within two CFG hops of a transfer are semantically relevant.
+- **Batch analysis (multi-threaded)**: Use Dask to process a CSV of bytecode strings in parallel and store all per-contract results (F1–F7 and Z-score) in `output.csv`.
 - **Reproducibility**: Includes scripts for training Word2Vec embeddings (`word2vec_Train/`) and for running on a Dask cluster.
 
 ---
 
-## Repository Structure
-
-```
-
-Obfuscation\_Tool/
-├── Obfuscation/
-│   ├── **init**.py
-│   ├── analyze.py
-│   ├── condition.py
-│   ├── evmasm.py
-│   ├── feature1.py
-│   ├── feature2.py
-│   ├── feature3.py
-│   ├── feature4.py
-│   ├── feature5.py
-│   ├── hashes.py
-│   ├── main.py
-│   ├── recover.py
-│   ├── rgcn.py
-│   ├── ssa.py
-│   ├── tsne.py
-│   └── **pycache**/  (compiled .pyc files)
-├── bytecode/                     ← (Optional) Sample bytecode files (hex strings without .txt)
-├── word2vec\_Train/
-│   ├── cfg.model                ← Configuration for Word2Vec training
-│   ├── trainword2vec.py         ← Script to train word2vec embeddings on extracted operation sequences
-│   └── word2vec.model           ← Pretrained Word2Vec model (optional)
-├── rattle-cli.py                ← Command‐line interface for single‐contract analysis
-├── rundask.py                   ← Script to run batch analysis over a CSV via Dask
-├── README.md                    ← (This file)
-├── output.csv                   ← (Generated) Consolidated results after batch run
-├── single\_output.txt            ← (Generated) Raw single‐contract output example
-├── test.csv                     ← (Example) CSV 
-└── template with `bytecode,address` columns for batch mode
-```
 
 - **rattle-cli.py**: The single‐contract CLI entrypoint. Reads a raw bytecode string from STDIN (no extension), invokes the analysis pipeline, and prints a human‐readable report plus a final numeric summary (as a list of values).  
 
@@ -86,7 +60,7 @@ This will:
 
 1. **Clone the repository**:
  ```bash
- git clone https://github.com/<your‐username>/Obfuscation_Tool.git
+ git clone https://github.com/dcszhang/Obfuscation_Tool.git
  cd Obfuscation_Tool
 ````
 
@@ -99,13 +73,8 @@ This will:
    # venv\Scripts\activate     # Windows PowerShell
    ```
 
-3. **Install required packages**. If `obfuscation_tool_requirements.txt` is provided, run:
-
-   ```bash
-   pip install -r obfuscation_tool_requirements.txt
-   ```
-
-   Otherwise, install at least:
+3. **Install required packages**. 
+Run:
 
    ```bash
    pip install \
@@ -151,35 +120,11 @@ Prints a formatted report, for example:
    -----------------------------------------------------------
    This is the 2 transfer
        …
-   -----------------------------------------------------------
-   (5) The maximum similarity between graphs:
-       Graph 0 and Graph 2: 99.6112%
-   -----------------------------------------------------------
-   (6) Address and Value in Transfer(External Call): False
-   -----------------------------------------------------------
-   (7) Function: _unknown_0xc19e1aea()
-       Total instructions: 102
-       call_related_instructions: 59
-       SSTORE_related_instructions: 0
-       Total Useless instructions: 43
-       Related Ratio: 57.84%
-   -----------------------------------------------------------
-   (7) Function: execute(bytes)
-       …
-   -----------------------------------------------------------
-   The function with the lowest Related Ratio:
-   Function: _unknown_0xc19e1aea()
-       Related Ratio: 57.84%
-   -----------------------------------------------------------
-   (8) log_found: False
-   Found PHI node: %240 = EQ(%238, #0)
-   Transfer Address Trace:
-   …
-   (9) Transfer have an external call condition to execute: False
+   
    --------------------------------------------------------------------------------------
                                      END
    --------------------------------------------------------------------------------------
-   [3, 4, 0, 99.6111512184143, False, 0.5784313725490197, False, False]
+   [3, 4, 0, 99.6111512184143, False, 0.5784313725490197, False]
    ```
 ---
 
