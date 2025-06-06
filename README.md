@@ -23,9 +23,7 @@ Key capabilities include:
      Binary flag indicating whether logs emitted within two CFG hops of a transfer are semantically relevant.
 - **Batch analysis (multi-threaded)**: Use Dask to process a CSV of bytecode strings in parallel and store all per-contract results (F1–F7 and Z-score) in `output.csv`.
 - **Reproducibility**: Includes scripts for training Word2Vec embeddings (`word2vec_Train/`) and for running on a Dask cluster.
-
-
-**Note:** The current code outputs a total of 8 parameters. The 5th parameter is used to indicate whether the parameters of the Transfer instruction are controlled externally, and the 8th parameter is used to indicate whether the conditions for executing the Transfer instruction are controlled externally. These two together constitute the F3 feature.
+- **Note:** The current code outputs a total of 8 parameters. The 5th parameter is used to indicate whether the parameters of the Transfer instruction are controlled externally, and the 8th parameter is used to indicate whether the conditions for executing the Transfer instruction are controlled externally. These two together constitute the F3 feature.
 ---
 
 
