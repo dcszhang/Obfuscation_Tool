@@ -3,7 +3,7 @@ from dask.distributed import Client
 from dask.diagnostics import ProgressBar
 import subprocess
 import time
-
+import pandas as pd  # 用于 pd.isna 检查
 def process_task(row):
     """
     以一整行 row（含 bytecode, address）为输入，
@@ -11,9 +11,16 @@ def process_task(row):
     Dask 会将这个 dict “展开”成多列。
     """
     idx = row.name
-    bytecode = row["Bytecode"]
-    address = row["Address"]
-
+    bytecode = row["bytecode"]
+    address = row["address"]
+    # ======= 新增：检查缺失值 =======
+    if pd.isna(bytecode) or bytecode is None:
+        print(f"⚠️ 进程 {idx} 的 bytecode 为空，跳过！")
+        return {
+            "index": int(idx + 1),
+            "address": address,
+            "output": "Error: Missing bytecode"
+        }
     # 去掉 0x 前缀
     if bytecode.startswith("0x"):
         bytecode = bytecode[2:]
@@ -21,7 +28,7 @@ def process_task(row):
     try:
         # print(f"⏳ 进程 {idx} 开始执行 rattle-cli.py")
         result = subprocess.run(
-            ["python3", "rattle-cli.py"],
+            ["python", "rattle-cli.py"],
             input=bytecode,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -56,7 +63,7 @@ def process_task(row):
 if __name__ == "__main__":
     # 1) 启动 Dask，使用 25 个进程 (而非线程)
     client = Client(
-        n_workers=80,
+        n_workers=10,
         threads_per_worker=1,
         processes=True,
         local_directory="dask_tmp",
@@ -64,15 +71,15 @@ if __name__ == "__main__":
     # print(client)  # 打印 Dask Worker 信息
     print("Dashboard:", client.dashboard_link)
     # 2) CSV 文件路径
-    csv_path = "1600MEV_bot_obfuscation/mev_bot_bytecode_clean.csv"
-    output_csv_path = "1600MEV_bot_obfuscation/mev_bot_output.csv"
+    csv_path = "test.csv"
+    output_csv_path = "output.csv"
 
     # 1) 用 ~200MB blocksize 自动分块
     df = dd.read_csv(csv_path, blocksize="50MB")
     print(f"初始分区数: {df.npartitions}")
 
     # 2) 如果想固定到 25 分区，再 repartition
-    df = df.repartition(npartitions=80)
+    df = df.repartition(npartitions=10)
     print(f"最终分区数: {df.npartitions}")
 
     # 4) 用 df.apply(...)，返回 dict，并指定 result_type="expand"

@@ -1,0 +1,81 @@
+--------------------------------------------------------------------------------------
+                        Smart contract analysis process                          
+--------------------------------------------------------------------------------------
+This is the 1 transfer
+    (1) Found Transfer Address instruction:
+            %145 = AND(%144, #4c36d2919e407f0cc2ee3c993ccf8ac26d9ce64e)
+    (2) trace_step: 3
+    (3) Tree height: 4
+    (4) String Operation times: 0
+-----------------------------------------------------------
+This is the 2 transfer
+    (1) Found Transfer Address instruction:
+            %183 = COINBASE()
+    (2) trace_step: 1
+    (3) Tree height: 1
+    (4) String Operation times: 0
+-----------------------------------------------------------
+This is the 3 transfer
+    (1) Found Transfer Address instruction:
+            %228 = AND(%227, #4c36d2919e407f0cc2ee3c993ccf8ac26d9ce64e)
+    (2) trace_step: 3
+    (3) Tree height: 4
+    (4) String Operation times: 0
+-----------------------------------------------------------
+This is the 4 transfer
+    (1) Found Transfer Address instruction:
+            %266 = COINBASE()
+    (2) trace_step: 1
+    (3) Tree height: 1
+    (4) String Operation times: 0
+-----------------------------------------------------------
+The transfer with the highest trace_step + Tree height + String Operation times:
+This is the 1 transfer
+    (1) Found Transfer Address instruction:
+            %145 = AND(%144, #4c36d2919e407f0cc2ee3c993ccf8ac26d9ce64e)
+    (2) trace_step: 3
+    (3) Tree height: 4
+    (4) String Operation times: 0
+-----------------------------------------------------------
+(5)The maximum similarity between graphs:
+    Graph 0 and Graph 2: 91.0178%
+-----------------------------------------------------------
+-----------------------------------------------------------
+(6)Address and Value in Transfer(External Call):False
+-----------------------------------------------------------
+(7)Function: execute(bytes)
+    Total instructions: 91
+    call_related_instructions: 57
+    SSTORE_related_instructions: 0
+    Total Useless instructions: 34
+    Related Ratio: 62.64%
+-----------------------------------------------------------
+(7)Function: _unknown_0xc19e1aea()
+    Total instructions: 102
+    call_related_instructions: 60
+    SSTORE_related_instructions: 0
+    Total Useless instructions: 42
+    Related Ratio: 58.82%
+-----------------------------------------------------------
+The function with the lowest Related Ratio:
+Function: _unknown_0xc19e1aea()
+    Related Ratio: 58.82%
+-----------------------------------------------------------
+(8)log_found: False
+Found PHI node: %157 = EQ(%155, #0)
+Trasfer Address Trace:
+Trasfer Address Trace:
+Found PHI node: %157 = EQ(%155, #0)
+Trasfer Address Trace:
+Trasfer Address Trace:
+Found PHI node: %240 = EQ(%238, #0)
+Trasfer Address Trace:
+Trasfer Address Trace:
+Found PHI node: %240 = EQ(%238, #0)
+Trasfer Address Trace:
+Trasfer Address Trace:
+(9)Transfer have an external call condition to execute: False
+--------------------------------------------------------------------------------------
+                                      END                                             
+--------------------------------------------------------------------------------------
+[3, 4, 0, 91.01775288581848, False, 0.5882352941176471, False, False]

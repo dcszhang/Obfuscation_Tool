@@ -15,9 +15,4 @@ if __name__ == '__main__':
         "stdout_to": None
     }
 
-
-    # 模拟解析参数后的行为
-    # print("Arguments parsed:")
-    # for key, value in args.items():
-    #     print(f"{key}: {value}")
     main()
